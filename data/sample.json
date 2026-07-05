@@ -1,0 +1,98 @@
+[
+    {
+        "id": "toeic730",
+        "name": "TOEIC730 英単語",
+        "description": "TOEIC頻出単語デッキ",
+        "cards": [
+            {
+                "id": 1,
+                "question": "abandon",
+                "answer": "捨てる・放棄する"
+            },
+            {
+                "id": 2,
+                "question": "achieve",
+                "answer": "達成する"
+            },
+            {
+                "id": 3,
+                "question": "acquire",
+                "answer": "習得する・取得する"
+            },
+            {
+                "id": 4,
+                "question": "adapt",
+                "answer": "適応する"
+            },
+            {
+                "id": 5,
+                "question": "adequate",
+                "answer": "十分な・適切な"
+            }
+        ]
+    },
+    {
+        "id": "kanji",
+        "name": "漢字読み練習",
+        "description": "漢字の読み方を覚えるデッキ",
+        "cards": [
+            {
+                "id": 101,
+                "question": "承認",
+                "answer": "しょうにん"
+            },
+            {
+                "id": 102,
+                "question": "概念",
+                "answer": "がいねん"
+            },
+            {
+                "id": 103,
+                "question": "趣旨",
+                "answer": "しゅし"
+            },
+            {
+                "id": 104,
+                "question": "顕著",
+                "answer": "けんちょ"
+            },
+            {
+                "id": 105,
+                "question": "遵守",
+                "answer": "じゅんしゅ"
+            }
+        ]
+    },
+    {
+        "id": "history",
+        "name": "日本史 基礎",
+        "description": "日本史重要事項",
+        "cards": [
+            {
+                "id": 201,
+                "question": "江戸幕府を開いた人物",
+                "answer": "徳川家康"
+            },
+            {
+                "id": 202,
+                "question": "関ヶ原の戦いが起きた年",
+                "answer": "1600年"
+            },
+            {
+                "id": 203,
+                "question": "明治維新が始まるきっかけとなった出来事",
+                "answer": "大政奉還"
+            },
+            {
+                "id": 204,
+                "question": "日本国憲法が施行された年",
+                "answer": "1947年"
+            },
+            {
+                "id": 205,
+                "question": "鎌倉幕府を開いた人物",
+                "answer": "源頼朝"
+            }
+        ]
+    }
+]
