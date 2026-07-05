@@ -25,6 +25,15 @@
 - Web Speech API
 - Service Worker (PWA)
 
+## 🌐 Live Demo
+
+GitHub Pagesで公開しています。
+
+https://tomx208-cmyk.github.io/QuarterFull/
+
+ブラウザからすぐに利用できます。
+
+※ Pagesを公開したらURLを追加してください。
 
 ## 📂 ディレクトリ構成
 
@@ -42,6 +51,7 @@ QuarterFull/
 ├── icons/
 ├── manifest.json
 └── sw.js
+```
 
 
 
