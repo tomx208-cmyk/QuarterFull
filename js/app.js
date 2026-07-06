@@ -558,27 +558,6 @@ const App = {
 
 
 
-        // 前のカードへ
-
-        UI.elements.previousButton
-
-            .addEventListener(
-
-                "click",
-
-                () => {
-
-
-                    Lesson.previousCard();
-
-
-                }
-
-            );
-
-
-
-
         // デッキの学習履歴をリセット
 
         UI.elements.resetButton

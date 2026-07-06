@@ -928,6 +928,50 @@ body.dark .loading {
 
         z-index: 100;
 
+        height: 52px;
+
+        padding: 0 12px;
+
+    }
+
+    .logo h1 {
+
+        font-size: 1.05rem;
+
+    }
+
+    .header-actions {
+
+        gap: 4px;
+
+    }
+
+    .icon-button {
+
+        width: 32px;
+
+        height: 32px;
+
+        font-size: 1rem;
+
+    }
+
+    .speech-rate-control {
+
+        padding: 2px 6px;
+
+    }
+
+    .speech-rate-control label {
+
+        display: none;
+
+    }
+
+    .speech-rate-control select {
+
+        font-size: .75rem;
+
     }
 
     .sidebar {
@@ -936,7 +980,19 @@ body.dark .loading {
 
         border-bottom: 1px solid var(--color-border);
 
-        padding: 18px;
+        padding: 8px 10px;
+
+    }
+
+    .sidebar-header {
+
+        margin-bottom: 6px;
+
+    }
+
+    .sidebar-header h2 {
+
+        font-size: .95rem;
 
     }
 
@@ -948,21 +1004,51 @@ body.dark .loading {
 
         overflow-x: auto;
 
-        gap: 12px;
+        gap: 8px;
 
-        padding-bottom: 8px;
+        padding-bottom: 6px;
 
     }
 
     .deck-item {
 
-        flex: 0 0 220px;
+        flex: 0 0 150px;
+
+        padding: 8px 10px;
+
+    }
+
+    .deck-name {
+
+        font-size: .85rem;
+
+    }
+
+    .deck-count {
+
+        font-size: .75rem;
 
     }
 
     .main {
 
-        padding: 18px;
+        padding: 10px;
+
+        gap: 10px;
+
+    }
+
+    .panel {
+
+        padding: 12px;
+
+    }
+
+    .panel h2 {
+
+        font-size: 1rem;
+
+        margin-bottom: 8px;
 
     }
 
@@ -972,31 +1058,91 @@ body.dark .loading {
 
         align-items: flex-start;
 
+        gap: 2px;
+
+        margin-bottom: 6px;
+
+    }
+
+    #deckTitle {
+
+        font-size: 1rem;
+
+    }
+
+    #progressText {
+
+        font-size: .8rem;
+
+    }
+
+    .progress-bar {
+
+        height: 6px;
+
+        margin-bottom: 10px;
+
     }
 
     .card {
 
-        min-height: 220px;
+        min-height: 140px;
 
-        padding: 24px;
+        padding: 14px;
 
     }
 
     .question {
 
-        font-size: 1.5rem;
+        font-size: 1.25rem;
 
     }
 
-    .answer {
+    .speaker-button {
 
-        font-size: 1.2rem;
+        width: 32px;
+
+        height: 32px;
+
+        margin-top: 6px;
+
+    }
+
+    .answer-text {
+
+        font-size: 1.05rem;
+
+    }
+
+    .example-block {
+
+        margin-top: 10px;
+
+        padding-top: 10px;
+
+    }
+
+    .example-text {
+
+        font-size: .9rem;
+
+    }
+
+    .example-translation {
+
+        font-size: .8rem;
 
     }
 
     .lesson-buttons {
 
-        flex-direction: column;
+        margin-top: 12px;
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 8px;
 
     }
 
@@ -1007,6 +1153,38 @@ body.dark .loading {
 
         width: 100%;
 
+        min-width: 0;
+
+        padding: 10px 12px;
+
+        font-size: .88rem;
+
+    }
+
+    .stats-grid {
+
+        gap: 8px;
+
+    }
+
+    .stat-card {
+
+        padding: 10px;
+
+    }
+
+    .stat-card .label {
+
+        font-size: .75rem;
+
+        margin-bottom: 4px;
+
+    }
+
+    .stat-card .value {
+
+        font-size: 1.3rem;
+
     }
 
 }
@@ -1015,19 +1193,19 @@ body.dark .loading {
 
     .header {
 
-        padding: 0 16px;
+        padding: 0 10px;
 
     }
 
     .logo h1 {
 
-        font-size: 1.2rem;
+        font-size: 1rem;
 
     }
 
     .panel {
 
-        padding: 18px;
+        padding: 10px;
 
     }
 

@@ -139,12 +139,6 @@ const UI = {
                 ),
 
 
-            previousButton:
-                document.getElementById(
-                    "previousButton"
-                ),
-
-
             resetButton:
                 document.getElementById(
                     "resetButton"
