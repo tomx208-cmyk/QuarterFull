@@ -399,6 +399,9 @@ const App = {
                     Lesson.updateStatistics();
 
 
+                    UI.scrollToDeckTitle();
+
+
                 }
 
             );

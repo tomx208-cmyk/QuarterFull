@@ -467,6 +467,9 @@ body {
 
     font-size: 1.35rem;
 
+    scroll-margin-top:
+        calc(var(--header-height) + 16px);
+
 }
 
 #progressText {
@@ -931,6 +934,12 @@ body.dark .loading {
         height: 52px;
 
         padding: 0 12px;
+
+    }
+
+    #deckTitle {
+
+        scroll-margin-top: 64px;
 
     }
 

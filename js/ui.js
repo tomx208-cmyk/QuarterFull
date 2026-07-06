@@ -1017,6 +1017,29 @@ const UI = {
 
 
 
+    scrollToDeckTitle() {
+
+
+        if (!this.elements.deckTitle) {
+
+            return;
+
+        }
+
+
+        this.elements.deckTitle.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start"
+
+        });
+
+
+    },
+
+
+
     // ==========================
     // Dashboard
     // ==========================
