@@ -227,7 +227,8 @@ const StorageManager = {
 
             {
                 theme: "light",
-                speechRate: 1.0
+                speechRate: 1.0,
+                shuffleMode: false
             }
 
         );
@@ -294,6 +295,34 @@ const StorageManager = {
 
 
         settings.speechRate = rate;
+
+
+        this.saveSettings(settings);
+
+
+    },
+
+
+
+    getShuffleMode() {
+
+        const settings =
+            this.getSettings();
+
+        return settings.shuffleMode ?? false;
+
+    },
+
+
+
+    setShuffleMode(enabled) {
+
+
+        const settings =
+            this.getSettings();
+
+
+        settings.shuffleMode = enabled;
 
 
         this.saveSettings(settings);

@@ -259,6 +259,15 @@ const Lesson = {
         }
 
 
+        // シャッフルモードが有効な場合は、優先度順ではなく
+        // ランダムな順番でカードを出題する
+        if (StorageManager.getShuffleMode()) {
+
+            return this.shuffleCards(deck.cards);
+
+        }
+
+
         const progress =
             StorageManager.getDeckProgress(deck.id);
 
@@ -315,6 +324,33 @@ const Lesson = {
 
 
         return scored.map(item => item.card);
+
+
+    },
+
+
+
+    // カード配列をFisher-Yatesアルゴリズムでシャッフルする
+    // (元の配列は変更せず、新しい配列を返す)
+    shuffleCards(cards) {
+
+
+        const shuffled =
+            [...cards];
+
+
+        for (let i = shuffled.length - 1; i > 0; i--) {
+
+            const j =
+                Math.floor(Math.random() * (i + 1));
+
+            [shuffled[i], shuffled[j]] =
+                [shuffled[j], shuffled[i]];
+
+        }
+
+
+        return shuffled;
 
 
     },
@@ -624,6 +660,34 @@ const Lesson = {
 
 
         UI.hideComplete();
+
+        this.showCurrentCard();
+
+
+    },
+
+
+
+    // 出題順の設定(シャッフルON/OFFなど)が変わった際に、
+    // 現在学習中のデッキがあればすぐに並び順を再計算する
+    refreshOrder() {
+
+
+        if (!this.currentDeck) {
+
+
+            return;
+
+
+        }
+
+
+        this.orderedCards =
+            this.buildStudyOrder(this.currentDeck);
+
+
+        this.currentIndex = 0;
+
 
         this.showCurrentCard();
 

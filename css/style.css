@@ -205,6 +205,20 @@ body.dark .icon-button:hover {
 
 }
 
+.icon-button.active {
+
+    background: var(--color-primary);
+
+    color: white;
+
+}
+
+.icon-button.active:hover {
+
+    background: var(--color-primary-hover);
+
+}
+
 
 /* ==========================
    Layout

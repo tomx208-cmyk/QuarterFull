@@ -256,6 +256,12 @@ const UI = {
             speechRateSelect:
                 document.getElementById(
                     "speechRateSelect"
+                ),
+
+
+            shuffleButton:
+                document.getElementById(
+                    "shuffleButton"
                 )
 
 
@@ -1243,6 +1249,30 @@ const UI = {
 
         this.applyTheme(
             next
+        );
+
+
+    },
+
+
+
+    // ==========================
+    // Shuffle Toggle
+    // ==========================
+
+    setShuffleButtonState(enabled) {
+
+
+        if (!this.elements.shuffleButton) {
+
+            return;
+
+        }
+
+
+        this.elements.shuffleButton.classList.toggle(
+            "active",
+            enabled
         );
 
 

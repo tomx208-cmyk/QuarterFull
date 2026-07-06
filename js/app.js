@@ -71,6 +71,11 @@ const App = {
             }
 
 
+            UI.setShuffleButtonState(
+                StorageManager.getShuffleMode()
+            );
+
+
 
             await this.loadData();
 
@@ -282,6 +287,50 @@ const App = {
 
 
                     UI.toggleTheme();
+
+
+                }
+
+            );
+
+
+
+
+        // ランダム出題の切り替え
+
+        UI.elements.shuffleButton
+
+            .addEventListener(
+
+                "click",
+
+                () => {
+
+
+                    const enabled =
+                        !StorageManager.getShuffleMode();
+
+
+                    StorageManager.setShuffleMode(
+                        enabled
+                    );
+
+
+                    UI.setShuffleButtonState(
+                        enabled
+                    );
+
+
+                    Lesson.refreshOrder();
+
+
+                    UI.showToast(
+
+                        enabled
+                            ? "🔀 ランダム出題にしました"
+                            : "優先度順(間隔反復)に戻しました"
+
+                    );
 
 
                 }
