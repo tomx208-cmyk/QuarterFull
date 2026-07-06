@@ -899,6 +899,27 @@ body.dark .loading {
 
     }
 
+    /* スマホでは「学習画面 → 今日の学習 → 統計」の順に
+       表示されるよう並び替える(PC表示・HTMLの構造には影響しない) */
+
+    #lessonSection {
+
+        order: 1;
+
+    }
+
+    #dashboard {
+
+        order: 2;
+
+    }
+
+    #statistics {
+
+        order: 3;
+
+    }
+
     .header {
 
         position: sticky;

@@ -10,7 +10,7 @@
 
 "use strict";
 
-const CACHE_VERSION = "v7";
+const CACHE_VERSION = "v8";
 const CACHE_NAME = `quarterfull-cache-${CACHE_VERSION}`;
 
 const CORE_ASSETS = [
