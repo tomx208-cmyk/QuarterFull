@@ -1032,6 +1032,30 @@ const StorageManager = {
     },
 
 
+    // 組み込みデッキの編集済みコピー(customDecks内)を削除し、
+    // 削除済みリストからも除外することで、JSON側の元の内容に戻す
+    restoreBuiltInDeck(deckId) {
+
+
+        const decks =
+            this.getCustomDecks()
+                .filter(deck => deck.id !== deckId);
+
+
+        this.saveCustomDecks(decks);
+
+
+        const deletedIds =
+            this.getDeletedDeckIds()
+                .filter(id => id !== deckId);
+
+
+        this.saveDeletedDeckIds(deletedIds);
+
+
+    },
+
+
     addCard(deckId, card) {
 
 

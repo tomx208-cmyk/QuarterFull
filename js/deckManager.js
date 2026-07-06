@@ -118,11 +118,32 @@ const DeckManager = {
 
         if (!deck) return;
 
+        // 組み込みデッキが、すでにローカルで編集されている(=customDecksに
+        // 保存されている)かどうかを、複製する前に確認しておく
+        const isBuiltIn =
+            App.builtInDecks.some(item => item.id === deckId);
+
+        const hasCustomOverride =
+            StorageManager.getCustomDecks()
+                .some(item => item.id === deckId);
+
         // 組み込みのサンプルデッキも編集できるよう、
         // 初回編集時にローカル保存の編集可能コピーを用意する
         StorageManager.ensureEditableDeck(deck);
 
         this.currentEditDeckId = deckId;
+
+        const restoreButton =
+            (isBuiltIn && hasCustomOverride)
+                ? `
+                    <button
+                        type="button"
+                        id="restoreDefaultButton"
+                        class="secondary-button">
+                        🔄 初期状態に戻す
+                    </button>
+                  `
+                : "";
 
         UI.openModal(
             "デッキを編集",
@@ -151,7 +172,19 @@ const DeckManager = {
                             カードを管理(${deck.cards.length}枚)
                         </button>
 
+                        ${restoreButton}
+
                     </div>
+
+                    ${
+                        isBuiltIn && hasCustomOverride
+                            ? `<p class="csv-hint">
+                                このデッキは組み込みのサンプルデッキです。
+                                「初期状態に戻す」を押すと、このデッキで行った
+                                編集内容が消え、最新の配布データの内容に戻ります。
+                              </p>`
+                            : ""
+                    }
 
                 </form>
             `
@@ -530,6 +563,18 @@ const DeckManager = {
         if (manageCardsButton && this.currentEditDeckId) {
 
             this.openCardManager(this.currentEditDeckId);
+
+            return;
+
+        }
+
+
+        const restoreDefaultButton =
+            event.target.closest("#restoreDefaultButton");
+
+        if (restoreDefaultButton && this.currentEditDeckId) {
+
+            this.confirmRestoreDefault(this.currentEditDeckId);
 
             return;
 
@@ -1114,6 +1159,35 @@ const DeckManager = {
         App.refreshData();
 
         UI.showToast("デッキを削除しました");
+
+    },
+
+
+    // ==========================
+    // 組み込みデッキを初期状態に戻す
+    // ==========================
+
+    confirmRestoreDefault(deckId) {
+
+        const builtInDeck =
+            App.builtInDecks.find(item => item.id === deckId);
+
+        if (!builtInDeck) return;
+
+        const confirmed =
+            window.confirm(
+                `「${builtInDeck.name}」をこのデッキで行った編集を破棄して、最新の配布データの内容(${builtInDeck.cards.length}枚)に戻します。よろしいですか？`
+            );
+
+        if (!confirmed) return;
+
+        StorageManager.restoreBuiltInDeck(deckId);
+
+        App.refreshData();
+
+        UI.showToast("デッキを初期状態に戻しました");
+
+        this.closeModal();
 
     }
 

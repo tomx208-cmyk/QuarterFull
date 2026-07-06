@@ -1,1377 +1,433 @@
-/**
- * ==========================================================
- * QuarterFull
- * storage.js
- * Phase 1 Complete Version
- * Part 1
- * ==========================================================
- */
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-"use strict";
+    <title>QuarterFull - あらゆる学習を1つにまとめる暗記アプリ</title>
 
+    <meta name="description" content="QuarterFull - あらゆる学習を1つにまとめる暗記プラットフォーム。単語・漢字・歴史など、間隔反復で効率よく覚えられるフラッシュカード学習アプリです。">
 
-const StorageManager = {
+    <meta name="theme-color" content="#2563eb">
 
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
-    // ==========================
-    // Keys
-    // ==========================
+    <!-- OGP / SNSシェア用 -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="QuarterFull - あらゆる学習を1つにまとめる暗記アプリ">
+    <meta property="og:description" content="単語・漢字・歴史など、間隔反復で効率よく覚えられるフラッシュカード学習アプリです。">
+    <meta property="og:image" content="icons/icon-512.png">
+    <meta property="og:locale" content="ja_JP">
 
-    KEYS: {
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="QuarterFull - あらゆる学習を1つにまとめる暗記アプリ">
+    <meta name="twitter:description" content="単語・漢字・歴史など、間隔反復で効率よく覚えられるフラッシュカード学習アプリです。">
+    <meta name="twitter:image" content="icons/icon-512.png">
 
-        SETTINGS: "quarterfull_settings",
+    <link rel="stylesheet" href="css/style.css">
+</head>
 
-        CURRENT: "quarterfull_current",
+<body>
 
-        PROGRESS: "quarterfull_progress",
+    <!-- ==========================
+         Header
+    ========================== -->
 
-        HISTORY: "quarterfull_history",
+    <header class="header">
 
-        STATS: "quarterfull_stats",
+        <div class="logo">
+            <h1>📚 QuarterFull</h1>
+        </div>
 
-        CUSTOM_DECKS: "quarterfull_custom_decks",
+        <div class="header-actions">
 
-        DELETED_DECKS: "quarterfull_deleted_decks"
+            <button
+                id="exportButton"
+                class="icon-button"
+                aria-label="バックアップを書き出す"
+                title="バックアップを書き出す">
+                ⬇️
+            </button>
 
-    },
+            <button
+                id="importButton"
+                class="icon-button"
+                aria-label="バックアップを読み込む"
+                title="バックアップを読み込む">
+                ⬆️
+            </button>
 
+            <input
+                type="file"
+                id="importFileInput"
+                accept="application/json"
+                class="hidden">
 
+            <div class="speech-rate-control">
 
-    // ==========================
-    // Initialize
-    // ==========================
+                <label for="speechRateSelect">🔊速度</label>
 
-    init() {
+                <select
+                    id="speechRateSelect"
+                    aria-label="読み上げ速度"
+                    title="読み上げ速度">
 
-        if (!localStorage.getItem(this.KEYS.SETTINGS)) {
+                    <option value="0.5">0.5倍</option>
+                    <option value="0.75">0.75倍</option>
+                    <option value="1">1.0倍</option>
+                    <option value="1.1">1.1倍</option>
+                    <option value="1.2">1.2倍</option>
+                    <option value="1.3">1.3倍</option>
 
-            this.save(
-                this.KEYS.SETTINGS,
-                {
-                    theme: "light",
-                    speechRate: 1.0
-                }
-            );
+                </select>
 
-        }
+            </div>
 
+            <button
+                id="themeButton"
+                class="icon-button"
+                aria-label="テーマ変更">
+                🌙
+            </button>
 
-        if (!localStorage.getItem(this.KEYS.CURRENT)) {
+        </div>
 
-            this.save(
-                this.KEYS.CURRENT,
-                {
-                    deckId: null,
-                    cardIndex: 0
-                }
-            );
+    </header>
 
-        }
 
 
-        if (!localStorage.getItem(this.KEYS.PROGRESS)) {
+    <!-- ==========================
+         Sidebar
+    ========================== -->
 
-            this.save(
-                this.KEYS.PROGRESS,
-                {}
-            );
+    <aside class="sidebar">
 
-        }
+        <div class="sidebar-header">
 
+            <h2>デッキ</h2>
 
-        if (!localStorage.getItem(this.KEYS.HISTORY)) {
+            <button
+                id="newDeckButton"
+                class="icon-button"
+                aria-label="新しいデッキを作成"
+                title="新しいデッキを作成">
+                ＋
+            </button>
 
-            this.save(
-                this.KEYS.HISTORY,
-                []
-            );
+        </div>
 
-        }
+        <div
+            id="deckList"
+            class="deck-list">
 
+            <!-- JS -->
 
-        if (!localStorage.getItem(this.KEYS.STATS)) {
+        </div>
 
-            this.save(
-                this.KEYS.STATS,
-                {
-                    totalAnswered: 0,
-                    totalCorrect: 0,
-                    streak: 0,
-                    lastStudyDate: null
-                }
-            );
+    </aside>
 
-        }
 
 
-        if (!localStorage.getItem(this.KEYS.CUSTOM_DECKS)) {
+    <!-- ==========================
+         Main
+    ========================== -->
 
-            this.save(
-                this.KEYS.CUSTOM_DECKS,
-                []
-            );
+    <main class="main">
 
-        }
+        <!-- Dashboard -->
 
+        <section
+            id="dashboard"
+            class="panel">
 
-        if (!localStorage.getItem(this.KEYS.DELETED_DECKS)) {
+            <h2>今日の学習</h2>
 
-            this.save(
-                this.KEYS.DELETED_DECKS,
-                []
-            );
+            <div class="stats-grid">
 
-        }
+                <div class="stat-card">
+                    <span class="label">学習数</span>
+                    <span
+                        id="todayCount"
+                        class="value">
+                        0
+                    </span>
+                </div>
 
-    },
+                <div class="stat-card">
+                    <span class="label">正答率</span>
+                    <span
+                        id="accuracy">
+                        0%
+                    </span>
+                </div>
 
+                <div class="stat-card">
+                    <span class="label">連続学習</span>
+                    <span
+                        id="streak">
+                        0日
+                    </span>
+                </div>
 
+            </div>
 
-    // ==========================
-    // Basic Storage
-    // ==========================
+        </section>
 
-    save(key, value) {
 
-        try {
 
-            localStorage.setItem(
+        <!-- Lesson -->
 
-                key,
+        <section
+            id="lessonSection"
+            class="panel">
 
-                JSON.stringify(value)
+            <div class="lesson-header">
 
-            );
+                <h2
+                    id="deckTitle">
+                    デッキを選択してください
+                </h2>
 
-            return true;
+                <div
+                    id="progressText">
+                    0 / 0
+                </div>
 
-        }
-        catch(error) {
+            </div>
 
-            console.error(
-                "Storage save error:",
-                error
-            );
 
-            return false;
+            <div class="progress-bar">
 
-        }
+                <div
+                    id="progressFill"
+                    class="progress-fill">
+                </div>
 
-    },
+            </div>
 
 
+            <article
+                id="card"
+                class="card">
 
-    load(key, defaultValue = null) {
+                <div
+                    id="question"
+                    class="question">
 
-        try {
+                    デッキを選択すると問題が表示されます。
 
-            const data =
-                localStorage.getItem(key);
+                </div>
 
+                <button
+                    id="speakQuestionButton"
+                    class="speaker-button hidden"
+                    aria-label="発音を聞く"
+                    title="発音を聞く">
+                    🔊
+                </button>
 
-            if (!data) {
+                <div
+                    id="answer"
+                    class="answer hidden">
 
-                return defaultValue;
+                    <div
+                        id="answerText"
+                        class="answer-text">
+                    </div>
 
-            }
+                    <div
+                        id="exampleBlock"
+                        class="example-block hidden">
 
+                        <p
+                            id="exampleText"
+                            class="example-text">
+                        </p>
 
-            return JSON.parse(data);
+                        <button
+                            id="speakExampleButton"
+                            class="speaker-button"
+                            aria-label="例文の発音を聞く"
+                            title="例文の発音を聞く">
+                            🔊
+                        </button>
 
-        }
-        catch(error) {
+                        <p
+                            id="exampleTranslationText"
+                            class="example-translation">
+                        </p>
 
-            console.error(
-                "Storage load error:",
-                error
-            );
+                    </div>
 
-            return defaultValue;
+                </div>
 
-        }
+            </article>
 
-    },
 
+            <div
+                id="completeScreen"
+                class="complete-card hidden">
 
+                <h2>🎉 学習完了！</h2>
 
-    remove(key) {
+                <p id="completeSummary"></p>
 
-        localStorage.removeItem(key);
+                <div class="complete-buttons">
 
-    },
+                    <button
+                        id="retryButton"
+                        class="primary-button">
+                        🔁 もう一度
+                    </button>
 
+                    <button
+                        id="backToListButton"
+                        class="secondary-button">
+                        デッキ一覧に戻る
+                    </button>
 
+                </div>
 
-    clear() {
+            </div>
 
-        Object.values(this.KEYS)
-            .forEach(key => {
 
-                localStorage.removeItem(key);
 
-            });
+            <div
+                id="lessonButtons"
+                class="lesson-buttons">
 
-    },
+                <button
+                    id="previousButton"
+                    class="secondary-button">
+                    ← 前へ
+                </button>
 
+                <button
+                    id="showAnswerButton"
+                    class="primary-button">
+                    答えを見る
+                </button>
 
+                <button
+                    id="correctButton"
+                    class="success-button hidden">
+                    ○ 覚えた
+                </button>
 
-    // ==========================
-    // Settings
-    // ==========================
+                <button
+                    id="wrongButton"
+                    class="danger-button hidden">
+                    × まだ
+                </button>
 
-    getSettings() {
+                <button
+                    id="resetButton"
+                    class="secondary-button">
+                    🔄 リセット
+                </button>
 
-        return this.load(
+            </div>
 
-            this.KEYS.SETTINGS,
+        </section>
 
-            {
-                theme: "light",
-                speechRate: 1.0
-            }
 
-        );
 
-    },
+        <!-- Statistics -->
 
+        <section
+            id="statistics"
+            class="panel">
 
+            <h2>統計</h2>
 
-    saveSettings(settings) {
+            <div
+                id="statisticsContent">
 
-        return this.save(
+                デッキを選択してください。
 
-            this.KEYS.SETTINGS,
+            </div>
 
-            settings
+        </section>
 
-        );
+    </main>
 
-    },
 
 
 
-    getTheme() {
+    <!-- ==========================
+         Loading
+    ========================== -->
 
-        return this.getSettings().theme;
+    <div
+        id="loading"
+        class="loading hidden">
 
-    },
+        Loading...
 
+    </div>
 
 
-    setTheme(theme) {
 
 
-        const settings =
-            this.getSettings();
+    <!-- ==========================
+         Toast
+    ========================== -->
 
+    <div
+        id="toast"
+        class="toast hidden">
+    </div>
 
-        settings.theme = theme;
 
 
-        this.saveSettings(settings);
+    <!-- ==========================
+         Modal
+    ========================== -->
 
+    <div
+        id="modalOverlay"
+        class="modal-overlay hidden">
 
-    },
+        <div class="modal">
 
+            <div class="modal-header">
 
+                <h2 id="modalTitle"></h2>
 
-    getSpeechRate() {
+                <button
+                    id="modalCloseButton"
+                    class="icon-button"
+                    aria-label="閉じる">
+                    ✕
+                </button>
 
-        const settings =
-            this.getSettings();
+            </div>
 
-        return settings.speechRate ?? 1.0;
+            <div
+                id="modalBody"
+                class="modal-body">
+            </div>
 
-    },
+        </div>
 
+    </div>
 
 
-    setSpeechRate(rate) {
 
 
-        const settings =
-            this.getSettings();
+    <!-- ==========================
+         Scripts
+    ========================== -->
 
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/lesson.js"></script>
+    <script src="js/deckManager.js"></script>
+    <script src="js/app.js"></script>
 
-        settings.speechRate = rate;
-
-
-        this.saveSettings(settings);
-
-
-    },
-
-
-
-    // ==========================
-    // Current Lesson
-    // ==========================
-
-    getCurrentLesson() {
-
-        return this.load(
-
-            this.KEYS.CURRENT,
-
-            {
-                deckId: null,
-                cardIndex: 0
-            }
-
-        );
-
-    },
-
-
-
-    saveCurrentLesson(
-        deckId,
-        cardIndex
-    ) {
-
-        return this.save(
-
-            this.KEYS.CURRENT,
-
-            {
-
-                deckId,
-
-                cardIndex
-
-            }
-
-        );
-
-    },
-
-
-
-    // ==========================
-    // Progress
-    // ==========================
-
-    getProgress() {
-
-        return this.load(
-
-            this.KEYS.PROGRESS,
-
-            {}
-
-        );
-
-    },
-
-
-
-    saveProgress(progress) {
-
-        return this.save(
-
-            this.KEYS.PROGRESS,
-
-            progress
-
-        );
-
-    },
-
-
-    getDeckProgress(deckId) {
-
-
-        const progress =
-            this.getProgress();
-
-
-        return progress[deckId] || {};
-
-    },
-
-
-
-    updateCardProgress(
-        deckId,
-        cardId,
-        correct
-    ) {
-
-
-        const progress =
-            this.getProgress();
-
-
-        if (!progress[deckId]) {
-
-            progress[deckId] = {};
-
-        }
-
-
-        const prev =
-            progress[deckId][cardId] || {
-
-                interval: 0,
-
-                easeFactor: 2.5,
-
-                reviewCount: 0,
-
-                dueDate: null
-
-            };
-
-
-        let { interval, easeFactor, reviewCount } = prev;
-
-
-        if (!correct) {
-
-            // 不正解: 復習回数をリセットし、翌日また出題する
-            reviewCount = 0;
-
-            interval = 1;
-
-            easeFactor = Math.max(1.3, easeFactor - 0.2);
-
-        }
-        else {
-
-            reviewCount++;
-
-            if (reviewCount === 1) {
-
-                interval = 1;
-
-            }
-            else if (reviewCount === 2) {
-
-                interval = 6;
-
-            }
-            else {
-
-                interval = Math.round(interval * easeFactor);
-
-            }
-
-            easeFactor = Math.max(1.3, easeFactor + 0.1);
-
-        }
-
-
-        const dueDate = new Date();
-
-        dueDate.setDate(dueDate.getDate() + interval);
-
-
-        progress[deckId][cardId] = {
-
-            result: correct,
-
-            interval,
-
-            easeFactor:
-                Math.round(easeFactor * 100) / 100,
-
-            reviewCount,
-
-            dueDate:
-                dueDate.toISOString(),
-
-            updatedAt:
-                new Date().toISOString()
-
-        };
-
-
-        this.saveProgress(progress);
-
-
-    },
-
-/**
- * ==========================================================
- * QuarterFull
- * storage.js
- * Phase 1 Complete Version
- * Part 2
- * ==========================================================
- */
-
-
-
-    // ==========================
-    // History
-    // ==========================
-
-    getHistory() {
-
-        return this.load(
-
-            this.KEYS.HISTORY,
-
-            []
-
-        );
-
-    },
-
-
-
-    saveHistory(history) {
-
-        return this.save(
-
-            this.KEYS.HISTORY,
-
-            history
-
-        );
-
-    },
-
-
-
-    addHistory(record) {
-
-
-        const history =
-            this.getHistory();
-
-
-
-        history.push({
-
-            ...record,
-
-            timestamp:
-                new Date().toISOString()
-
-        });
-
-
-
-        this.saveHistory(history);
-
-
-    },
-
-
-
-    // ==========================
-    // Statistics
-    // ==========================
-
-    getStats() {
-
-        return this.load(
-
-            this.KEYS.STATS,
-
-            {
-
-                totalAnswered: 0,
-
-                totalCorrect: 0,
-
-                streak: 0,
-
-                lastStudyDate: null
-
-            }
-
-        );
-
-    },
-
-
-
-    saveStats(stats) {
-
-        return this.save(
-
-            this.KEYS.STATS,
-
-            stats
-
-        );
-
-    },
-
-
-
-    updateStats(isCorrect) {
-
-
-        const stats =
-            this.getStats();
-
-
-
-        const today =
-            new Date()
-                .toISOString()
-                .slice(0,10);
-
-
-
-        stats.totalAnswered++;
-
-
-
-        if (isCorrect) {
-
-            stats.totalCorrect++;
-
-        }
-
-
-
-        if (
-            stats.lastStudyDate !== today
-        ) {
-
-
-            if (!stats.lastStudyDate) {
-
-                stats.streak = 1;
-
-            }
-            else {
-
-
-                const last =
-                    new Date(
-                        stats.lastStudyDate
-                    );
-
-
-                const current =
-                    new Date(today);
-
-
-
-                const diff =
-                    Math.floor(
-                        (
-                            current - last
-                        )
-                        /
-                        (
-                            1000 *
-                            60 *
-                            60 *
-                            24
-                        )
-                    );
-
-
-
-                if (diff === 1) {
-
-                    stats.streak++;
-
-                }
-                else if (diff > 1) {
-
-                    stats.streak = 1;
-
-                }
-
-            }
-
-
-
-            stats.lastStudyDate = today;
-
-
-        }
-
-
-
-        this.saveStats(stats);
-
-
-    },
-
-
-
-    getAccuracy() {
-
-
-        const stats =
-            this.getStats();
-
-
-
-        if (
-            stats.totalAnswered === 0
-        ) {
-
-            return 0;
-
-        }
-
-
-
-        return Math.round(
-
-            (
-                stats.totalCorrect /
-                stats.totalAnswered
-            )
-            *
-            100
-
-        );
-
-
-    },
-
-
-
-    getTodayCount() {
-
-
-        const today =
-            new Date()
-                .toISOString()
-                .slice(0,10);
-
-
-
-        const history =
-            this.getHistory();
-
-
-
-        return history.filter(item =>
-
-            item.timestamp
-                .slice(0,10)
-                === today
-
-        ).length;
-
-
-    },
-
-
-
-    // ==========================
-    // Deck Statistics
-    // ==========================
-
-    getDeckStatistics(deckId) {
-
-
-        const progress =
-            this.getDeckProgress(deckId);
-
-
-
-        const cards =
-            Object.values(progress);
-
-
-
-        const learned =
-            cards.length;
-
-
-
-        const correct =
-            cards.filter(card =>
-
-                card.result === true
-
-            ).length;
-
-
-
-        return {
-
-
-            learned,
-
-
-            correct,
-
-
-            accuracy:
-
-                learned === 0
-
-                ? 0
-
-                :
-
-                Math.round(
-
-                    (
-                        correct /
-                        learned
-
-                    )
-                    *
-                    100
-
-                )
-
-
-        };
-
-
-    },
-
-
-
-    // ==========================
-    // Custom Decks / Cards
-    // ==========================
-
-    generateId(prefix = "id") {
-
-        return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-    },
-
-
-    getCustomDecks() {
-
-        return this.load(
-
-            this.KEYS.CUSTOM_DECKS,
-
-            []
-
-        );
-
-    },
-
-
-    saveCustomDecks(decks) {
-
-        return this.save(
-
-            this.KEYS.CUSTOM_DECKS,
-
-            decks
-
-        );
-
-    },
-
-
-    addDeck(name) {
-
-
-        const decks =
-            this.getCustomDecks();
-
-
-        const deck = {
-
-            id: this.generateId("deck"),
-
-            name: name.trim(),
-
-            custom: true,
-
-            cards: []
-
-        };
-
-
-        decks.push(deck);
-
-
-        this.saveCustomDecks(decks);
-
-
-        return deck;
-
-    },
-
-
-    updateDeck(deckId, data) {
-
-
-        const decks =
-            this.getCustomDecks();
-
-
-        const target =
-            decks.find(deck => deck.id === deckId);
-
-
-        if (!target) {
-
-            return null;
-
-        }
-
-
-        if (typeof data.name === "string") {
-
-            target.name = data.name.trim();
-
-        }
-
-
-        this.saveCustomDecks(decks);
-
-
-        return target;
-
-    },
-
-
-    deleteDeck(deckId) {
-
-
-        const decks =
-            this.getCustomDecks()
-                .filter(deck => deck.id !== deckId);
-
-
-        this.saveCustomDecks(decks);
-
-
-        // 組み込み(JSON)のサンプルデッキも削除できるよう、
-        // 削除済みIDとして記録しておき、次回マージ時に除外する
-        const deletedIds =
-            this.getDeletedDeckIds();
-
-
-        if (!deletedIds.includes(deckId)) {
-
-            deletedIds.push(deckId);
-
-            this.saveDeletedDeckIds(deletedIds);
-
-        }
-
-
-        this.resetDeck(deckId);
-
-    },
-
-
-    getDeletedDeckIds() {
-
-        return this.load(
-
-            this.KEYS.DELETED_DECKS,
-
-            []
-
-        );
-
-    },
-
-
-    saveDeletedDeckIds(ids) {
-
-        return this.save(
-
-            this.KEYS.DELETED_DECKS,
-
-            ids
-
-        );
-
-    },
-
-
-    // 組み込みデッキを初めて編集/カード追加する際に、
-    // 編集可能なローカルコピーとしてcustomDecksへ複製する。
-    // 既にコピー済みの場合はそれをそのまま返す。
-    ensureEditableDeck(deck) {
-
-
-        const decks =
-            this.getCustomDecks();
-
-
-        const existing =
-            decks.find(item => item.id === deck.id);
-
-
-        if (existing) {
-
-            return existing;
-
-        }
-
-
-        const cloned = {
-
-            id: deck.id,
-
-            name: deck.name,
-
-            custom: true,
-
-            cards:
-                deck.cards.map(card => ({ ...card }))
-
-        };
-
-
-        decks.push(cloned);
-
-
-        this.saveCustomDecks(decks);
-
-
-        return cloned;
-
-    },
-
-
-    // 組み込みデッキの編集済みコピー(customDecks内)を削除し、
-    // 削除済みリストからも除外することで、JSON側の元の内容に戻す
-    restoreBuiltInDeck(deckId) {
-
-
-        const decks =
-            this.getCustomDecks()
-                .filter(deck => deck.id !== deckId);
-
-
-        this.saveCustomDecks(decks);
-
-
-        const deletedIds =
-            this.getDeletedDeckIds()
-                .filter(id => id !== deckId);
-
-
-        this.saveDeletedDeckIds(deletedIds);
-
-
-    },
-
-
-    addCard(deckId, card) {
-
-
-        const decks =
-            this.getCustomDecks();
-
-
-        const deck =
-            decks.find(item => item.id === deckId);
-
-
-        if (!deck) {
-
-            return null;
-
-        }
-
-
-        const newCard = {
-
-            id: this.generateId("card"),
-
-            question: card.question.trim(),
-
-            answer: card.answer.trim(),
-
-            example:
-                (card.example || "").trim(),
-
-            exampleTranslation:
-                (card.exampleTranslation || "").trim()
-
-        };
-
-
-        deck.cards.push(newCard);
-
-
-        this.saveCustomDecks(decks);
-
-
-        return newCard;
-
-    },
-
-
-    updateCard(deckId, cardId, data) {
-
-
-        const decks =
-            this.getCustomDecks();
-
-
-        const deck =
-            decks.find(item => item.id === deckId);
-
-
-        if (!deck) {
-
-            return null;
-
-        }
-
-
-        const card =
-            deck.cards.find(item => item.id === cardId);
-
-
-        if (!card) {
-
-            return null;
-
-        }
-
-
-        if (typeof data.question === "string") {
-
-            card.question = data.question.trim();
-
-        }
-
-
-        if (typeof data.answer === "string") {
-
-            card.answer = data.answer.trim();
-
-        }
-
-
-        if (typeof data.example === "string") {
-
-            card.example = data.example.trim();
-
-        }
-
-
-        if (typeof data.exampleTranslation === "string") {
-
-            card.exampleTranslation = data.exampleTranslation.trim();
-
-        }
-
-
-        this.saveCustomDecks(decks);
-
-
-        return card;
-
-    },
-
-
-    deleteCard(deckId, cardId) {
-
-
-        const decks =
-            this.getCustomDecks();
-
-
-        const deck =
-            decks.find(item => item.id === deckId);
-
-
-        if (!deck) {
-
-            return;
-
-        }
-
-
-        deck.cards =
-            deck.cards.filter(card => card.id !== cardId);
-
-
-        this.saveCustomDecks(decks);
-
-    },
-
-
-
-    // ==========================
-    // Backup
-    // ==========================
-
-    exportData() {
-
-
-        return {
-
-
-            settings:
-                this.getSettings(),
-
-
-            current:
-                this.getCurrentLesson(),
-
-
-            progress:
-                this.getProgress(),
-
-
-            history:
-                this.getHistory(),
-
-
-            stats:
-                this.getStats(),
-
-
-            customDecks:
-                this.getCustomDecks(),
-
-
-            deletedDeckIds:
-                this.getDeletedDeckIds()
-
-
-        };
-
-
-    },
-
-
-
-    importData(data) {
-
-
-        if (!data) {
-
-            return false;
-
-        }
-
-
-
-        if (data.settings) {
-
-            this.saveSettings(
-                data.settings
-            );
-
-        }
-
-
-
-        if (data.current) {
-
-            this.save(
-                this.KEYS.CURRENT,
-                data.current
-            );
-
-        }
-
-
-
-        if (data.progress) {
-
-            this.saveProgress(
-                data.progress
-            );
-
-        }
-
-
-
-        if (data.history) {
-
-            this.saveHistory(
-                data.history
-            );
-
-        }
-
-
-
-        if (data.stats) {
-
-            this.saveStats(
-                data.stats
-            );
-
-        }
-
-
-        if (data.customDecks) {
-
-            this.saveCustomDecks(
-                data.customDecks
-            );
-
-        }
-
-
-        if (data.deletedDeckIds) {
-
-            this.saveDeletedDeckIds(
-                data.deletedDeckIds
-            );
-
-        }
-
-
-
-        return true;
-
-
-    },
-
-
-
-    // ==========================
-    // Reset
-    // ==========================
-
-    resetDeck(deckId) {
-
-
-        const progress =
-            this.getProgress();
-
-
-
-        delete progress[deckId];
-
-
-
-        this.saveProgress(progress);
-
-
-    },
-
-
-
-    resetAll() {
-
-
-        this.clear();
-
-
-        this.init();
-
-
-    }
-
-
-};
-
-
-
-// ==========================
-// Export
-// ==========================
-
-// Object.freeze(StorageManager);
-
-
-window.StorageManager =
-    StorageManager;
+</body>
+</html>
