@@ -1,122 +1,433 @@
-/**
- * ==========================================================
- * QuarterFull
- * sw.js
- * オフライン対応用のService Worker
- * (学習データ自体はlocalStorageに保存されるため、
- *  ここではアプリ本体の静的ファイルをキャッシュする)
- * ==========================================================
- */
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-"use strict";
+    <title>QuarterFull - あらゆる学習を1つにまとめる暗記アプリ</title>
 
-const CACHE_VERSION = "v8";
-const CACHE_NAME = `quarterfull-cache-${CACHE_VERSION}`;
+    <meta name="description" content="QuarterFull - あらゆる学習を1つにまとめる暗記プラットフォーム。単語・漢字・歴史など、間隔反復で効率よく覚えられるフラッシュカード学習アプリです。">
 
-const CORE_ASSETS = [
-    "./",
-    "./index.html",
-    "./css/style.css",
-    "./js/app.js",
-    "./js/ui.js",
-    "./js/lesson.js",
-    "./js/storage.js",
-    "./js/deckManager.js",
-    "./data/sample.json",
-    "./manifest.json",
-    "./icons/icon-192.png",
-    "./icons/icon-512.png"
-];
+    <meta name="theme-color" content="#2563eb">
 
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
-// ==========================
-// Install: コアアセットをキャッシュ
-// ==========================
+    <!-- OGP / SNSシェア用 -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="QuarterFull - あらゆる学習を1つにまとめる暗記アプリ">
+    <meta property="og:description" content="単語・漢字・歴史など、間隔反復で効率よく覚えられるフラッシュカード学習アプリです。">
+    <meta property="og:image" content="icons/icon-512.png">
+    <meta property="og:locale" content="ja_JP">
 
-self.addEventListener("install", event => {
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="QuarterFull - あらゆる学習を1つにまとめる暗記アプリ">
+    <meta name="twitter:description" content="単語・漢字・歴史など、間隔反復で効率よく覚えられるフラッシュカード学習アプリです。">
+    <meta name="twitter:image" content="icons/icon-512.png">
 
-    event.waitUntil(
-        caches
-            .open(CACHE_NAME)
-            .then(cache => cache.addAll(CORE_ASSETS))
-            .then(() => self.skipWaiting())
-    );
+    <link rel="stylesheet" href="css/style.css">
+</head>
 
-});
+<body>
 
+    <!-- ==========================
+         Header
+    ========================== -->
 
-// ==========================
-// Activate: 古いキャッシュを破棄
-// ==========================
+    <header class="header">
 
-self.addEventListener("activate", event => {
+        <div class="logo">
+            <h1>📚 QuarterFull</h1>
+        </div>
 
-    event.waitUntil(
-        caches
-            .keys()
-            .then(keys =>
-                Promise.all(
-                    keys
-                        .filter(key => key !== CACHE_NAME)
-                        .map(key => caches.delete(key))
-                )
-            )
-            .then(() => self.clients.claim())
-    );
+        <div class="header-actions">
 
-});
+            <button
+                id="exportButton"
+                class="icon-button"
+                aria-label="バックアップを書き出す"
+                title="バックアップを書き出す">
+                ⬇️
+            </button>
 
+            <button
+                id="importButton"
+                class="icon-button"
+                aria-label="バックアップを読み込む"
+                title="バックアップを読み込む">
+                ⬆️
+            </button>
 
-// ==========================
-// Fetch: キャッシュ優先 + バックグラウンド更新
-// ==========================
+            <input
+                type="file"
+                id="importFileInput"
+                accept="application/json"
+                class="hidden">
 
-self.addEventListener("fetch", event => {
+            <div class="speech-rate-control">
 
-    if (event.request.method !== "GET") {
+                <label for="speechRateSelect">🔊速度</label>
 
-        return;
+                <select
+                    id="speechRateSelect"
+                    aria-label="読み上げ速度"
+                    title="読み上げ速度">
 
-    }
+                    <option value="0.5">0.5倍</option>
+                    <option value="0.75">0.75倍</option>
+                    <option value="1">1.0倍</option>
+                    <option value="1.1">1.1倍</option>
+                    <option value="1.2">1.2倍</option>
+                    <option value="1.3">1.3倍</option>
 
+                </select>
 
-    const url = new URL(event.request.url);
+            </div>
 
-    if (url.origin !== self.location.origin) {
+            <button
+                id="themeButton"
+                class="icon-button"
+                aria-label="テーマ変更">
+                🌙
+            </button>
 
-        return;
+        </div>
 
-    }
-
-
-    event.respondWith(
-
-        caches.match(event.request).then(cached => {
-
-            const networkFetch =
-                fetch(event.request)
-                    .then(response => {
-
-                        if (response && response.status === 200) {
-
-                            const clone = response.clone();
-
-                            caches
-                                .open(CACHE_NAME)
-                                .then(cache => cache.put(event.request, clone));
-
-                        }
-
-                        return response;
-
-                    })
-                    .catch(() => cached);
+    </header>
 
 
-            return cached || networkFetch;
 
-        })
+    <!-- ==========================
+         Sidebar
+    ========================== -->
 
-    );
+    <aside class="sidebar">
 
-});
+        <div class="sidebar-header">
+
+            <h2>デッキ</h2>
+
+            <button
+                id="newDeckButton"
+                class="icon-button"
+                aria-label="新しいデッキを作成"
+                title="新しいデッキを作成">
+                ＋
+            </button>
+
+        </div>
+
+        <div
+            id="deckList"
+            class="deck-list">
+
+            <!-- JS -->
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ==========================
+         Main
+    ========================== -->
+
+    <main class="main">
+
+        <!-- Dashboard -->
+
+        <section
+            id="dashboard"
+            class="panel">
+
+            <h2>今日の学習</h2>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <span class="label">学習数</span>
+                    <span
+                        id="todayCount"
+                        class="value">
+                        0
+                    </span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="label">正答率</span>
+                    <span
+                        id="accuracy">
+                        0%
+                    </span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="label">連続学習</span>
+                    <span
+                        id="streak">
+                        0日
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- Lesson -->
+
+        <section
+            id="lessonSection"
+            class="panel">
+
+            <div class="lesson-header">
+
+                <h2
+                    id="deckTitle">
+                    デッキを選択してください
+                </h2>
+
+                <div
+                    id="progressText">
+                    0 / 0
+                </div>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div
+                    id="progressFill"
+                    class="progress-fill">
+                </div>
+
+            </div>
+
+
+            <article
+                id="card"
+                class="card">
+
+                <div
+                    id="question"
+                    class="question">
+
+                    デッキを選択すると問題が表示されます。
+
+                </div>
+
+                <button
+                    id="speakQuestionButton"
+                    class="speaker-button hidden"
+                    aria-label="発音を聞く"
+                    title="発音を聞く">
+                    🔊
+                </button>
+
+                <div
+                    id="answer"
+                    class="answer hidden">
+
+                    <div
+                        id="answerText"
+                        class="answer-text">
+                    </div>
+
+                    <div
+                        id="exampleBlock"
+                        class="example-block hidden">
+
+                        <p
+                            id="exampleText"
+                            class="example-text">
+                        </p>
+
+                        <button
+                            id="speakExampleButton"
+                            class="speaker-button"
+                            aria-label="例文の発音を聞く"
+                            title="例文の発音を聞く">
+                            🔊
+                        </button>
+
+                        <p
+                            id="exampleTranslationText"
+                            class="example-translation">
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <div
+                id="completeScreen"
+                class="complete-card hidden">
+
+                <h2>🎉 学習完了！</h2>
+
+                <p id="completeSummary"></p>
+
+                <div class="complete-buttons">
+
+                    <button
+                        id="retryButton"
+                        class="primary-button">
+                        🔁 もう一度
+                    </button>
+
+                    <button
+                        id="backToListButton"
+                        class="secondary-button">
+                        デッキ一覧に戻る
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <div
+                id="lessonButtons"
+                class="lesson-buttons">
+
+                <button
+                    id="previousButton"
+                    class="secondary-button">
+                    ← 前へ
+                </button>
+
+                <button
+                    id="showAnswerButton"
+                    class="primary-button">
+                    答えを見る
+                </button>
+
+                <button
+                    id="correctButton"
+                    class="success-button hidden">
+                    ○ 覚えた
+                </button>
+
+                <button
+                    id="wrongButton"
+                    class="danger-button hidden">
+                    × まだ
+                </button>
+
+                <button
+                    id="resetButton"
+                    class="secondary-button">
+                    🔄 リセット
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- Statistics -->
+
+        <section
+            id="statistics"
+            class="panel">
+
+            <h2>統計</h2>
+
+            <div
+                id="statisticsContent">
+
+                デッキを選択してください。
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+
+    <!-- ==========================
+         Loading
+    ========================== -->
+
+    <div
+        id="loading"
+        class="loading hidden">
+
+        Loading...
+
+    </div>
+
+
+
+
+    <!-- ==========================
+         Toast
+    ========================== -->
+
+    <div
+        id="toast"
+        class="toast hidden">
+    </div>
+
+
+
+    <!-- ==========================
+         Modal
+    ========================== -->
+
+    <div
+        id="modalOverlay"
+        class="modal-overlay hidden">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <h2 id="modalTitle"></h2>
+
+                <button
+                    id="modalCloseButton"
+                    class="icon-button"
+                    aria-label="閉じる">
+                    ✕
+                </button>
+
+            </div>
+
+            <div
+                id="modalBody"
+                class="modal-body">
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <!-- ==========================
+         Scripts
+    ========================== -->
+
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/lesson.js"></script>
+    <script src="js/deckManager.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>
